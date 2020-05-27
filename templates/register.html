@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>注册丨iStudy</title>
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<body>
+<div class="login-container">
+    <h1>iStudy知识共享平台</h1>
+    <div class="connect">
+        <p>欢迎注册</p>
+    </div>
+    <form action="" method="post" id="loginForm" novalidate>
+        {% csrf_token %}
+        <div>
+            {{ form_obj.username }} <span>{{ form_obj.username.errors.0 }}</span>
+            {{ form_obj.password }} <span>{{ form_obj.password.errors.0 }}</span>
+            {{ form_obj.re_password }}<span>{{ form_obj.re_password.errors.0 }}</span>
+            {{ form_obj.position }}<span>{{ form_obj.position.errors.0 }}</span>
+            {{ form_obj.company }}<span>{{ form_obj.company.errors.0 }}</span>
+            {{ form_obj.phone }}<span>{{ form_obj.phone.errors.0 }}</span>
+        </div>
+
+        <button id="submit" type="submit">注册</button>
+    </form>
+    <a href="{% url 'login' %}">
+        <button type="button" class="register-tis">已有账号，去登陆？</button>
+    </a>
+</div>
+</body>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/common.js' %}"></script>
+<script src="{% static 'js/supersized.3.2.7.min.js' %}"></script>
+<script src="{% static 'js/supersized-init.js' %}"></script>
+{#<script src="{% static 'js/jquery.validate.min.js' %}"></script>#}
+
+</html>
