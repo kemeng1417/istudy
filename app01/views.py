@@ -15,9 +15,24 @@ def login(request):
         md5.update(password.encode('utf-8'))
         user_obj = models.User.objects.filter(username=username, password=md5.hexdigest()).first()
         if user_obj:
+            # 登陆成功
+            # 保存登陆状态 用户名
+            request.session['is_login'] = True
+            request.session['username'] = user_obj.username
+            url = request.GET.get('url')
+            if url:
+                return redirect(url)
             return redirect('index')
         error = '登陆名或密码错误'
     return render(request, 'login.html', locals())
+
+
+def logout(request):
+    request.session.delete()
+    url = request.path_info
+    if url:
+        return redirect(url)
+    return redirect('index')
 
 
 class RegForm(forms.ModelForm):
@@ -69,13 +84,13 @@ class RegForm(forms.ModelForm):
         self.add_error('re_password', '两次密码不一致')
         raise ValidationError('两次密码不一致')
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         field = self.fields['company']
         choice = field.choices
         choice[0] = ('', '请选择公司')
         field.choices = choice
+
 
 def register(request):
     form_obj = RegForm()
@@ -95,4 +110,23 @@ def register(request):
 
 
 def index(request):
-    return render(request, 'index.html')
+    # 查询所有的文章
+    all_articles = models.Article.objects.all()
+    is_login = request.session.get('is_login')
+    username = request.session.get('username')
+
+    return render(request, 'index.html', locals())
+
+
+def article(request, pk):
+    article_obj = models.Article.objects.get(pk=pk)
+    return render(request, 'article.html', {'article_obj': article_obj})
+
+
+def backend(request):
+    return render(request, 'dashboard.html')
+
+
+def article_list(request):
+    all_articles = models.Article.objects.all()
+    return render(request, 'article_list.html', {'all_articles': all_articles})
