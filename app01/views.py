@@ -1,9 +1,7 @@
 from django.shortcuts import render, redirect
 from . import models
-from django import forms
-import re
-from django.core.exceptions import ValidationError
 import hashlib
+from .forms import RegForm, ArticleForm
 
 
 # Create your views here.
@@ -19,6 +17,7 @@ def login(request):
             # 保存登陆状态 用户名
             request.session['is_login'] = True
             request.session['username'] = user_obj.username
+            request.session['pk'] = user_obj.pk
             url = request.GET.get('url')
             if url:
                 return redirect(url)
@@ -35,67 +34,10 @@ def logout(request):
     return redirect('index')
 
 
-class RegForm(forms.ModelForm):
-    password = forms.CharField(error_messages={'required': '这是必填项'},
-                               widget=forms.PasswordInput(
-                                   attrs={'placeholder': '密码', 'type': 'password', 'autocomplete': "off"}),
-                               label='密码',
-                               min_length=6)
-    re_password = forms.CharField(error_messages={'required': '这是必填项'},
-                                  widget=forms.PasswordInput(
-                                      attrs={'placeholder': '确认密码', 'type': 'password', 'autocomplete': "off"}),
-                                  label='确认密码',
-                                  min_length=6)
-
-    class Meta:
-        model = models.User
-        fields = '__all__'  # ['username', 'password']
-        exclude = ['last_time']
-        widgets = {
-            'username': forms.TextInput(attrs={'placeholder': '用户名', 'autocomplete': "off"}),
-            'position': forms.TextInput(attrs={'placeholder': '请填写职位', 'autocomplete': "off"}),
-            'phone': forms.TextInput(attrs={'placeholder': '手机号', 'autocomplete': "off"}),
-            # 'company': forms.Select()
-        }
-        error_messages = {
-            'username': {
-                'required': '这是必填项'
-            }
-        }
-
-    # 局部钩子
-    def clean_phone(self):
-        phone = self.cleaned_data.get('phone')
-        if re.match(r'^1[3-9]\d{9}$', phone):
-            return phone
-        raise ValidationError('手机号格式不正确')
-
-    def clean(self):
-        # 校验唯一性
-        self._validate_unique = True
-        password = self.cleaned_data.get('password', '')
-        re_password = self.cleaned_data.get('re_password')
-
-        if password == re_password:
-            md5 = hashlib.md5()
-            md5.update(password.encode('utf-8'))
-            self.cleaned_data['password'] = md5.hexdigest()
-            return self.cleaned_data
-        self.add_error('re_password', '两次密码不一致')
-        raise ValidationError('两次密码不一致')
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        field = self.fields['company']
-        choice = field.choices
-        choice[0] = ('', '请选择公司')
-        field.choices = choice
-
-
 def register(request):
     form_obj = RegForm()
     if request.method == 'POST':
-        form_obj = RegForm(request.POST)
+        form_obj = RegForm(request.POST,request.FILES)
         if form_obj.is_valid():
             # 注册成功
             # print(request.POST)
@@ -114,6 +56,7 @@ def index(request):
     all_articles = models.Article.objects.all()
     is_login = request.session.get('is_login')
     username = request.session.get('username')
+    user_obj = models.User.objects.filter(pk=request.session.get('pk')).first()
 
     return render(request, 'index.html', locals())
 
@@ -130,3 +73,42 @@ def backend(request):
 def article_list(request):
     all_articles = models.Article.objects.all()
     return render(request, 'article_list.html', {'all_articles': all_articles})
+
+
+def article_add(request):
+    form_obj = ArticleForm()
+    if request.method == 'POST':
+        form_obj = ArticleForm(request.POST)
+        if form_obj.is_valid():
+            # 保存文章内容表
+            detail = request.POST.get('detail')
+            detail_obj = models.ArticleDetail.objects.create(content=detail)
+            # 保存文章表
+            # 方法一
+            # form_obj.cleaned_data['detail_id'] = detail_obj.pk
+            # models.Article.objects.create(**form_obj.cleaned_data)
+            # 方法二
+            form_obj.instance.detail_id = detail_obj.pk
+            form_obj.save()
+            return redirect('article_list')
+    return render(request, 'article_add.html', {'form_obj': form_obj})
+
+
+def article_edit(request, pk):
+    article_obj = models.Article.objects.filter(pk=pk).first()
+    form_obj = ArticleForm(instance=article_obj)
+    if request.method == 'POST':
+        form_obj = ArticleForm(request.POST, instance=article_obj)
+        if form_obj.is_valid():
+            form_obj.instance.detail.content = request.POST.get('detail')
+
+            form_obj.instance.detail.save() # 保存文章详情
+            form_obj.save() # 保存文章信息
+            return redirect('article_list')
+    return render(request, 'article_edit.html', {'article_obj': article_obj, 'form_obj': form_obj})
+
+
+def article_del(request, pk):
+    article_obj = models.Article.objects.filter(pk=pk).first()
+    article_obj.delete()
+    return redirect('article_list')

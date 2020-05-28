@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.safestring import mark_safe
 
 
 # Create your models here.
@@ -15,6 +16,7 @@ class User(models.Model):
     last_time = models.DateTimeField(null=True, blank=True, verbose_name='上次登陆时间')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='注册时间')
     is_active = models.BooleanField(default=True)
+    avatar = models.ImageField(upload_to='img/avatar', default='img/avatar/default.jpg')
 
     def __str__(self):
         return self.username
@@ -37,8 +39,18 @@ class Article(models.Model):
     category = models.ForeignKey('Category', on_delete=models.DO_NOTHING, null=True, blank=True, verbose_name='板块分类')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     update_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
-    delete_status = models.BooleanField(default=False, verbose_name='删除状态')
+    publish_status = models.BooleanField(default=False, choices=((False, '未发布'), (True, '发布')), verbose_name='发布状态')
     detail = models.OneToOneField('ArticleDetail', on_delete=models.DO_NOTHING)
+
+
+    def show_publish_status(self):
+        show_dic = {
+            True: 'green',
+            False: '#c34a0c',
+        }
+        return mark_safe(
+            '<span style="background:{};color:white;padding:3px">{}</span>'.format(show_dic[self.publish_status],
+                                                                                   self.get_publish_status_display()))
 
 
 class ArticleDetail(models.Model):

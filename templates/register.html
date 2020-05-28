@@ -10,7 +10,7 @@
     <div class="connect">
         <p>欢迎注册</p>
     </div>
-    <form action="" method="post" id="loginForm" novalidate>
+    <form action="" method="post" id="loginForm" novalidate enctype="multipart/form-data">
         {% csrf_token %}
         <div>
             {{ form_obj.username }} <span>{{ form_obj.username.errors.0 }}</span>
@@ -19,6 +19,7 @@
             {{ form_obj.position }}<span>{{ form_obj.position.errors.0 }}</span>
             {{ form_obj.company }}<span>{{ form_obj.company.errors.0 }}</span>
             {{ form_obj.phone }}<span>{{ form_obj.phone.errors.0 }}</span>
+            {{ form_obj.avatar }}<span>{{ form_obj.phone.errors.0 }}</span>
         </div>
 
         <button id="submit" type="submit">注册</button>
