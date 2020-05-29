@@ -5,6 +5,13 @@ from . import models
 import hashlib
 
 
+class BKForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
+
+
 class RegForm(forms.ModelForm):
     password = forms.CharField(error_messages={'required': '这是必填项'},
                                widget=forms.PasswordInput(
@@ -62,7 +69,7 @@ class RegForm(forms.ModelForm):
         field.choices = choice
 
 
-class ArticleForm(forms.ModelForm):
+class ArticleForm(BKForm):
     class Meta:
         model = models.Article
         fields = '__all__'
@@ -72,3 +79,18 @@ class ArticleForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-control'
+
+        self.fields['author'].choices = [(self.instance.author_id, self.instance.author.username), ]
+
+
+class ArticleDetailForm(forms.ModelForm):
+    class Meta:
+        model = models.ArticleDetail
+        fields = '__all__'
+
+
+class CategoryForm(BKForm):
+    class Meta:
+        model = models.Category
+        fields = '__all__'
+

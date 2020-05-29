@@ -1,0 +1,25 @@
+{% extends 'dashboard.html' %}
+{% block main %}
+    <h1>用户列表</h1>
+    <table class="table table-bordered table-hover">
+        <tbody>
+        {% for foo in user %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ foo.username }}</td>
+                <td>{{ foo.pwd }}</td>
+            </tr>
+        {% endfor %}
+
+
+        </tbody>
+
+    </table>
+
+
+            {{ page_html|safe }}
+
+
+
+
+{% endblock %}

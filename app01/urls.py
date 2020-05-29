@@ -24,9 +24,17 @@ urlpatterns = [
     url(r'^article/(\d+)$', views.article, name='article'),
     url(r'^backend/$', views.backend, name='backend'),
 
-
     url(r'^article_list/$', views.article_list, name='article_list'),
     url(r'^article_add/$', views.article_add, name='article_add'),
     url(r'^article_edit/(\d+)/$', views.article_edit, name='article_edit'),
     url(r'^article_del/(\d+)/$', views.article_del, name='article_del'),
+
+    url(r'^user_list/$', views.user_list, name='user_list'),
+
+    url(r'^category_list/$', views.category_list, name='category_list'),
+    url(r'^category_add/$', views.category_change, name='category_add'),
+    url(r'^category_edit/(\d+)/$', views.category_change, name='category_edit'),
+    url(r'^category_del/(\d+)/$', views.category_del, name='category_del'),
+
+    url(r'^comment/$', views.comment, name='comment'),
 ]

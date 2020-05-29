@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.safestring import mark_safe
-
+from ckeditor_uploader.fields import RichTextUploadingField
 
 # Create your models here.
 class User(models.Model):
@@ -54,7 +54,7 @@ class Article(models.Model):
 
 
 class ArticleDetail(models.Model):
-    content = models.TextField(verbose_name='文章内容')
+    content = RichTextUploadingField(verbose_name='文章内容')
 
 
 class Comment(models.Model):
@@ -67,3 +67,22 @@ class Comment(models.Model):
     article = models.ForeignKey('Article', verbose_name='文章', on_delete=models.DO_NOTHING)
     time = models.DateTimeField(auto_now_add=True, verbose_name='审核时间')
     status = models.BooleanField(verbose_name='审核状态', default=True)
+
+
+class Series(models.Model):
+    """
+    系列
+    """
+    title =  models.CharField(verbose_name='系列名称', max_length=32)
+    article = models.ManyToManyField('Article', verbose_name='文章')
+    user = models.ManyToManyField('User', verbose_name='用户', through='UserSeries')
+    # through 通过另外一张自定义的关系表创建多对多的关系
+
+
+class UserSeries(models.Model):
+    """
+    用户和系列关系表,添加进度字段
+    """
+    user = models.ForeignKey('User', verbose_name='用户')
+    series = models.ForeignKey('Series', verbose_name='系列')
+    progress = models.CharField(max_length=32, default='0.00',verbose_name='进度')

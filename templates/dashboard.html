@@ -4,7 +4,7 @@
     {% load static %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INSPINIA | E-commerce</title>
+    <title>iStudy</title>
     <link rel="stylesheet" href="{% static 'plugins/dashboard/css/bootstrap-3.3.4.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/font-awesome-4.7.0/css/font-awesome.css' %}">
     <link href="{% static 'plugins/dashboard/css/footable.core.css' %}" rel="stylesheet">
@@ -28,7 +28,7 @@
                             <li><a href="contacts.html">Contacts</a></li>
                             <li><a href="mailbox.html">Mailbox</a></li>
                             <li class="divider"></li>
-                            <li><a href="login.html">Logout</a></li>
+                            <li><a href="{% url 'logout' %}">Logout</a></li>
                         </ul>
                     </div>
                     <div class="logo-element">
@@ -39,7 +39,7 @@
                     <a href="{% url 'article_list' %}"><i class="fa fa-diamond"></i> <span class="nav-label">文章管理</span></a>
                 </li>
                 <li>
-                    <a href="layouts.html"><i class="fa fa-diamond"></i> <span class="nav-label">Layouts</span></a>
+                    <a href="{% url 'category_list' %}"><i class="fa fa-diamond"></i> <span class="nav-label">分类管理</span></a>
                 </li>
                 {#                <li>#}
                 {#                    <a href="#"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">Graphs</span><span#}
@@ -248,10 +248,10 @@
                 <div class="navbar-header">
                     <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i>
                     </a>
-                    <form role="search" class="navbar-form-custom" action="search_results.html">
+                    <form role="search" class="navbar-form-custom" action="">
                         <div class="form-group">
                             <input type="text" placeholder="Search for something..." class="form-control"
-                                   name="top-search" id="top-search">
+                                   name="query" id="top-search">
                         </div>
                     </form>
                 </div>
@@ -1122,5 +1122,8 @@
     });
 
 </script>
+{% block js %}
+
+{% endblock %}
 </body>
 </html>

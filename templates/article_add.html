@@ -15,7 +15,9 @@
         <div class="form-group">
             <label for="detail" class="col-sm-2 control-label">文章内容</label>
             <div class="col-sm-8">
-                <textarea class="form-control" rows="3" name="detail" id="detail"></textarea>
+                {#                <textarea class="form-control" rows="3" name="detail" id="detail"></textarea>#}
+                {{ article_detail_form_obj.content }}<span
+                    class="sr-only">{{ article_detail_form_obj.content.errors.0 }}</span>
             </div>
         </div>
 
@@ -25,4 +27,9 @@
             </div>
         </div>
     </form>
+{% endblock %}
+{% block js %}
+    {% load static %}
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
 {% endblock %}

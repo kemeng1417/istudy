@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+{% load static %}
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -12,8 +13,9 @@
     <title>Blog Template for Bootstrap</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-    {% load static %}
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/comment/comment.css' %}" rel="stylesheet">
+    <link href="{% static 'css/comment/style.css' %}" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="{% static 'css/blog.css' %}" rel="stylesheet">
 
@@ -29,6 +31,38 @@
     <div class="blog-header">
         <h1>{{ article_obj.title }}</h1>
         <p class="lead blog-description">{{ article_obj.detail.content }}</p>
+    </div>
+    <div class="commentAll">
+
+        <div class="reviewArea clearfix">
+            <div class="flex-text-wrap">
+                <pre class="pre"><span></span><br></pre>
+                <textarea class="content comment-input" placeholder="Please enter a comment…"></textarea></div>
+            <a href="javascript:;" id="comment" class="plBtn">评论</a>
+        </div>
+
+
+        <div class="comment-show">
+            {% for comment in article_obj.comment_set.all %}
+            <div class="comment-show-con clearfix">
+                <div class="comment-show-con-img pull-left"><img src="{{ comment.author.avatar.url }}" alt=""></div>
+                <div class="comment-show-con-list pull-left clearfix">
+                    <div class="pl-text clearfix"><a href="#" class="comment-size-name">{{ comment.author.username }} : </a> <span
+                            class="my-pl-con">&nbsp;{{ comment.content }} </span></div>
+                    <div class="date-dz"><span class="date-dz-left pull-left comment-time">{{ comment.time }}</span>
+                        <div class="date-dz-right pull-right comment-pl-block"><a href="javascript:;"
+                                                                                  class="removeBlock">删除</a>
+                        </div>
+                    </div>
+                    <div class="hf-list-con"></div>
+                </div>
+            </div>
+            {% endfor %}
+
+
+
+        </div>
+
     </div>
 
 
@@ -46,8 +80,53 @@
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
-<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+{#<script>window.jQuery || document.write('<script src="{% static 'js/jquery.min.js' %}"><\/script>')</script>#}
+<script src="{% static 'plugins/dashboard/js/bootstrap.min.js' %}"></script>
+
+
+<script>
+    $('#comment').click(function () {
+        var content = $('.comment-input').val();
+        var article_id = {{ article_obj.pk }};
+        var author_id = {{ request.user_obj.pk }};
+        var author_name = '{{ request.user_obj.username }}';
+        var author_avatar = '{{ request.user_obj.avatar.url }}';
+        $.ajax({
+            url: '/comment/',
+            data: {
+                content: content,
+                article_id: article_id,
+                author_id: author_id,
+            },
+            success: (res) => {
+                if (res.status) {
+                    // 评论插入数据库成功
+                    $('.comment-show').append(`<div class="comment-show-con clearfix">
+                <div class="comment-show-con-img pull-left"><img src="${author_avatar}" alt=""></div>
+                <div class="comment-show-con-list pull-left clearfix">
+                    <div class="pl-text clearfix"><a href="#" class="comment-size-name">${author_name}: </a> <span
+                            class="my-pl-con">${content} </span></div>
+                    <div class="date-dz"><span class="date-dz-left pull-left comment-time">${res.time}</span>
+                        <div class="date-dz-right pull-right comment-pl-block"><a href="javascript:;"
+                                                                                  class="removeBlock">删除</a>
+                        </div>
+                    </div>
+                    <div class="hf-list-con"></div>
+                </div>
+            </div>`
+                    );
+                    $('.comment-input').val('');
+                    alert('评论成功')
+
+
+                }
+
+            }
+        })
+
+    })
+</script>
+
 </body>
 </html>

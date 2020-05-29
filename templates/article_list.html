@@ -26,10 +26,12 @@
                 <td>{{ article.create_time }}</td>
                 <td>{{ article.get_publish_status_display }}</td>
                 <td>{{ article.show_publish_status }}</td>
-                <td><a class="btn btn-info btn-xs" href="{% url 'article_edit' article.pk %}"><i class="fa fa-edit fa-2x"></i></a>
+                {% load my_tags %}
+                <td><a class="btn btn-info btn-xs" href="{% reverse_url request 'article_edit' article.pk %}"><i class="fa fa-edit fa-2x"></i></a>
                     <a class="btn btn-danger btn-xs" href="{% url 'article_del' article.pk %}"><i class="fa fa-trash fa-2x"></i></a></td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+    {{ page_html|safe }}
 {% endblock %}
