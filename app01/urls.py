@@ -37,4 +37,6 @@ urlpatterns = [
     url(r'^category_del/(\d+)/$', views.category_del, name='category_del'),
 
     url(r'^comment/$', views.comment, name='comment'),
+
+    url(r'^series_list/$', views.series_list, name='series_list'),
 ]

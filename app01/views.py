@@ -6,6 +6,8 @@ from utils.pagination import Pagination
 from django.db.models import Q
 from django.http.response import JsonResponse
 from django.utils import timezone
+
+
 # Create your views here.
 def login(request):
     if request.method == 'POST':
@@ -55,7 +57,7 @@ def search_query(request, field_list):
     q = Q()
     q.connector = 'OR'
     for field in field_list:
-        q.children.append(Q(('{}__contains'.format(field),query)))
+        q.children.append(Q(('{}__contains'.format(field), query)))
 
     return q
 
@@ -80,10 +82,10 @@ def backend(request):
 
 
 def article_list(request):
-    fields_list = ['title','category__title', 'detail__content']
-    q = search_query(request,fields_list)
+    fields_list = ['title', 'category__title', 'detail__content']
+    q = search_query(request, fields_list)
 
-    all_articles = models.Article.objects.filter(q,author=request.user_obj)
+    all_articles = models.Article.objects.filter(q, author=request.user_obj)
     page = Pagination(request, all_articles.count())
     return render(request, 'article_list.html',
                   {'all_articles': all_articles[page.start:page.end], 'page_html': page.page_html})
@@ -125,7 +127,7 @@ def article_edit(request, pk):
             article_detail_form_obj.save()
             # form_obj.instance.detail.save()  # 保存文章详情
             form_obj.save()  # 保存文章信息
-            url =request.GET.get('url')
+            url = request.GET.get('url')
             if url:
                 return redirect(url)
             return redirect('article_list')
@@ -172,4 +174,11 @@ def category_del(request, pk):
 def comment(request):
     obj = models.Comment.objects.create(**request.GET.dict())
     time = timezone.localtime(obj.time).strftime('%Y-%m-%d %H:%M%S')
-    return JsonResponse({'status':True,'time':time})
+    return JsonResponse({'status': True, 'time': time})
+
+
+def series_list(request):
+
+    all_series = models.Series.objects.filter()
+    return render(request, 'series_list.html',
+                  {'all_series': all_series})

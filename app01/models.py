@@ -74,8 +74,8 @@ class Series(models.Model):
     系列
     """
     title =  models.CharField(verbose_name='系列名称', max_length=32)
-    article = models.ManyToManyField('Article', verbose_name='文章')
-    user = models.ManyToManyField('User', verbose_name='用户', through='UserSeries')
+    articles = models.ManyToManyField('Article', verbose_name='文章')
+    users = models.ManyToManyField('User', verbose_name='用户', through='UserSeries')
     # through 通过另外一张自定义的关系表创建多对多的关系
 
 
