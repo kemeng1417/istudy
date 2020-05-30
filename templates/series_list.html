@@ -1,7 +1,7 @@
 {% extends 'dashboard.html' %}
 {% block main %}
     <h1>系列列表</h1>
-    <a class="btn btn-primary btn-sm" href=""><i class="fa fa-plus"></i></a>
+    <a class="btn btn-primary btn-sm" href="{% url 'series_add' %}"><i class="fa fa-plus"></i></a>
     <table class="table table-bordered table-hover" style="font-size: 18px">
         <thead>
         <tr>
@@ -22,7 +22,7 @@
                 <td>{{ series.title }}</td>
                 <td>{{ series.articles.count }}</td>
                 <td>{{ series.users.count }}</td>
-                <td><a class="btn btn-info btn-xs" href=""><i
+                <td><a class="btn btn-info btn-xs" href="{% url 'series_edit' series.pk %}"><i
                         class="fa fa-edit fa-2x"></i></a>
                     <a class="btn btn-danger btn-xs" href=""><i
                             class="fa fa-trash fa-2x"></i></a></td>

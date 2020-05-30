@@ -30,7 +30,7 @@
 
     <div class="blog-header">
         <h1>{{ article_obj.title }}</h1>
-        <p class="lead blog-description">{{ article_obj.detail.content }}</p>
+        <p class="lead blog-description">{{ article_obj.detail.content|safe }}</p>
     </div>
     <div class="commentAll">
 
@@ -44,21 +44,22 @@
 
         <div class="comment-show">
             {% for comment in article_obj.comment_set.all %}
-            <div class="comment-show-con clearfix">
-                <div class="comment-show-con-img pull-left"><img src="{{ comment.author.avatar.url }}" alt=""></div>
-                <div class="comment-show-con-list pull-left clearfix">
-                    <div class="pl-text clearfix"><a href="#" class="comment-size-name">{{ comment.author.username }} : </a> <span
-                            class="my-pl-con">&nbsp;{{ comment.content }} </span></div>
-                    <div class="date-dz"><span class="date-dz-left pull-left comment-time">{{ comment.time }}</span>
-                        <div class="date-dz-right pull-right comment-pl-block"><a href="javascript:;"
-                                                                                  class="removeBlock">删除</a>
+                <div class="comment-show-con clearfix">
+                    <div class="comment-show-con-img pull-left"><img src="{{ comment.author.avatar.url }}" alt=""></div>
+                    <div class="comment-show-con-list pull-left clearfix">
+                        <div class="pl-text clearfix"><a href="#"
+                                                         class="comment-size-name">{{ comment.author.username }} : </a>
+                            <span
+                                    class="my-pl-con">&nbsp;{{ comment.content }} </span></div>
+                        <div class="date-dz"><span class="date-dz-left pull-left comment-time">{{ comment.time }}</span>
+                            <div class="date-dz-right pull-right comment-pl-block"><a href="javascript:;"
+                                                                                      class="removeBlock">删除</a>
+                            </div>
                         </div>
+                        <div class="hf-list-con"></div>
                     </div>
-                    <div class="hf-list-con"></div>
                 </div>
-            </div>
             {% endfor %}
-
 
 
         </div>
@@ -86,6 +87,30 @@
 
 
 <script>
+    var user_id = {{ request.user_obj.pk }};
+    var article_id = {{ article_obj.pk }};
+    var point = {{ article_obj.point }};
+    var time = {{ article_obj.duration.total_seconds }};
+
+    if (point !== 0) {
+        setTimeout(function () {
+            $.ajax({
+                url: '/point/',
+                data: {
+                    user_id: user_id,
+                    article_id: article_id,
+                    point: point,
+                },
+                success: function(res) {
+                    if (res.status){
+                        alert(`阅读已结束,获得${point}积分!`)
+                    }
+                }
+            })
+        }, time * 1000) //时间为毫秒
+    }
+
+
     $('#comment').click(function () {
         var content = $('.comment-input').val();
         var article_id = {{ article_obj.pk }};

@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.safestring import mark_safe
 from ckeditor_uploader.fields import RichTextUploadingField
-
+import datetime
 # Create your models here.
 class User(models.Model):
     """
@@ -41,7 +41,8 @@ class Article(models.Model):
     update_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
     publish_status = models.BooleanField(default=False, choices=((False, '未发布'), (True, '发布')), verbose_name='发布状态')
     detail = models.OneToOneField('ArticleDetail', on_delete=models.DO_NOTHING)
-
+    point = models.IntegerField(default=0,verbose_name='文章积分')
+    duration = models.DurationField(default=datetime.timedelta(),verbose_name='推荐阅读时长')
 
     def show_publish_status(self):
         show_dic = {
@@ -52,6 +53,8 @@ class Article(models.Model):
             '<span style="background:{};color:white;padding:3px">{}</span>'.format(show_dic[self.publish_status],
                                                                                    self.get_publish_status_display()))
 
+    def __str__(self):
+        return self.title
 
 class ArticleDetail(models.Model):
     content = RichTextUploadingField(verbose_name='文章内容')
@@ -85,4 +88,13 @@ class UserSeries(models.Model):
     """
     user = models.ForeignKey('User', verbose_name='用户')
     series = models.ForeignKey('Series', verbose_name='系列')
+    point = models.IntegerField(default=0,verbose_name='获取积分')
+    total_point = models.IntegerField(default=0,verbose_name='total_总积分')
     progress = models.CharField(max_length=32, default='0.00',verbose_name='进度')
+
+
+class PointDetail(models.Model):
+    user = models.ForeignKey('User', verbose_name='用户')
+    article = models.ForeignKey('Article',verbose_name='文章')
+    point = models.IntegerField(default=0, verbose_name='积分')
+    time = models.DateTimeField(auto_now_add=True)

@@ -94,3 +94,9 @@ class CategoryForm(BKForm):
         model = models.Category
         fields = '__all__'
 
+
+
+class SeriesForm(BKForm):
+    class Meta:
+        model = models.Series
+        fields = '__all__'

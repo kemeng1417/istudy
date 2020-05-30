@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect
 from . import models
 import hashlib
-from .forms import RegForm, ArticleForm, ArticleDetailForm, CategoryForm
+from .forms import RegForm, ArticleForm, ArticleDetailForm, CategoryForm, SeriesForm
 from utils.pagination import Pagination
-from django.db.models import Q
+from django.db.models import Q, F, Sum
 from django.http.response import JsonResponse
 from django.utils import timezone
 
@@ -64,7 +64,7 @@ def search_query(request, field_list):
 
 def index(request):
     # 查询所有的文章
-    all_articles = models.Article.objects.all()
+    all_articles = models.Article.objects.filter(publish_status=True).order_by('-create_time')
     is_login = request.session.get('is_login')
     username = request.session.get('username')
 
@@ -178,7 +178,68 @@ def comment(request):
 
 
 def series_list(request):
-
     all_series = models.Series.objects.filter()
     return render(request, 'series_list.html',
                   {'all_series': all_series})
+
+
+def series_change(request, pk=None):
+    obj = models.Series.objects.filter(pk=pk).first()
+    form_obj = SeriesForm(instance=obj)
+    if request.method == 'POST':
+        form_obj = SeriesForm(request.POST, instance=obj)
+        if form_obj.is_valid():
+            # 新增系列的对象
+            form_obj.instance.save()
+            # 保存对象关联的文章列表
+            obj = form_obj.instance
+            obj.articles.set(form_obj.cleaned_data.get('articles'))  # 对象列表
+            # 保存对象关联的作者列表及进度
+            users = form_obj.cleaned_data.get('users')
+            if not pk:
+                obj_list = []
+                for user in users:
+                    obj_list.append(models.UserSeries(user_id=user.pk, series_id=obj.pk))
+                if obj_list:
+                    # 批量插入
+                    models.UserSeries.objects.bulk_create(obj_list)
+            else:
+                # 转化成集合进行操作
+                old_users = set(obj.users.all())
+                new_users = set(users)
+                # 删除的用户
+                del_users = old_users - new_users  # 差值
+                if del_users:
+                    models.UserSeries.objects.filter(user_id__in=del_users).delete()
+                    # 新增的用户
+                add_users = new_users - old_users  # 差值
+                if add_users:
+                    obj_list = []
+                    for user in add_users:
+                        obj_list.append(models.UserSeries(user_id=user.pk, series_id=obj.pk))
+                    if obj_list:
+                        # 批量插入
+                        models.UserSeries.objects.bulk_create(obj_list)
+                # 没有改变的用户
+            return redirect('series_list')
+    title = '编辑系列' if pk else '新增系列'
+    return render(request, 'form.html', {'form_obj': form_obj, 'title': title})
+
+
+def profile(request):
+    all_user_series = models.UserSeries.objects.filter(user=request.user_obj)
+    return render(request, 'profile.html', {'all_user_series': all_user_series})
+
+
+def point(request):
+    obj, created = models.PointDetail.objects.get_or_create(**request.GET.dict())
+    query_set = models.UserSeries.objects.filter(user=request.user_obj, series__in=obj.article.series_set.all())
+    if created:
+        res = query_set.values('series_id').annotate(total_point=Sum('series__articles__point'))
+        for i in res:
+            print(i)
+            models.UserSeries.objects.filter(user=request.user_obj, series_id=i['series_id']).update(
+                total_point=i['total_point'])
+        query_set.update(point=F('point') + obj.point,progress=F('point')/F('total_point')*100)
+        return JsonResponse({'status': True})
+    return JsonResponse({'status': False})
